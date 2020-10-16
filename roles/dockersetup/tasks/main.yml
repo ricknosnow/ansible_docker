@@ -1,8 +1,6 @@
 ---
 # Setup docker environment for testing
 
-# install docker
-
 - name: install docker
   apt:
     name:
@@ -11,7 +9,6 @@
     update_cache: yes
   when: ansible_distribution in ["Debian", "Ubuntu"]
 
-# install docker-compose
 - name: Install docker-compose software
   apt:
     name:
@@ -20,7 +17,6 @@
   notify:
     - restart docker
     
-# create docker directory structure
 - name: Create docker directory structure
   become: yes
   file:
@@ -47,7 +43,6 @@
     append: yes
     state: present
 
-# copy docker compose file over
 - name: copy docker-compose.yml file
   copy:
     src: docker-compose.yml
@@ -56,7 +51,6 @@
     group: rick
     mode: 0644
 
-# copy hsLogs.sh over
 - name: copy hsLogs.sh file
   copy:
     src: hsLogs.sh
@@ -65,7 +59,6 @@
     group: rick
     mode: 0744
 
-# copy tar of homeassistant files over
 - name: copy home.tar.gz file
   copy:
     src: /home/rick/home.tar.gz
@@ -74,12 +67,11 @@
     group: rick
     mode: 0644
 
-- name: check if config directory exits
+- name: check if config directory exits for extract task
   stat:
     path: /home/rick/docker/homeassist/config
   register: file_details
 
-# untar files into homesassistant directory
 - name: Extract home.tar.gz into /home/rick/docker/homeassist
   unarchive:
     src: /home/rick/docker/homeassist/home.tar.gz
@@ -87,7 +79,6 @@
     remote_src: yes
   when: file_details.stat.exists == False
 
-# start container
 - name: run the docker-compose to start containers
   community.general.docker_compose:
     project_src: /home/rick/docker/
