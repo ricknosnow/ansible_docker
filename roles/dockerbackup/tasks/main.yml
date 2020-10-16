@@ -1,0 +1,44 @@
+---
+# This playbook is to backup a docker compose image and data
+
+# stop the container
+- name: stop the container
+  community.general.docker_compose:
+    project_src: /home/rick/docker/
+    services: homeassistant
+    build: no
+    stopped: yes
+  register: output
+
+- ansible.builtin.debug:
+    var: output
+
+# backup the image and store somewhere
+- name: Archive the homeassistant image
+  community.general.docker_image:
+    name: homeassistant/home-assistant
+    tag: stable
+    state: present
+    timeout: 120
+    archive_path: /home/rick/docker/homeassist/homeassist_image.tar
+    source: local
+
+# backup the volumne and store somewhere
+- name: Create a home.tar.gz archive of the config directory
+  community.general.archive:
+    path: /home/rick/docker/homeassist/config
+    dest: /home/rick/docker/homeassist/home.tar.gz
+    format: gz
+    force_archive: true
+
+# start the container back up
+# stop the container
+- name: start the container
+  community.general.docker_compose:
+    project_src: /home/rick/docker/
+    services: homeassistant
+    build: no
+    stopped: no
+  register: output
+
+...

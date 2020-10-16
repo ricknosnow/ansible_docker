@@ -36,9 +36,16 @@
     mode: 0775
     state: directory
 
-- name: Add user to docker group
+- name: Add rick user to docker group
   user:
     name: rick
+    groups: docker
+    append: yes
+    state: present
+
+- name: Add simone user to docker group
+  user:
+    name: simone
     groups: docker
     append: yes
     state: present
