@@ -1,0 +1,42 @@
+---
+# Setup docker environment for testing
+
+# install docker
+
+- name: install docker
+  apt:
+    name:
+      - docker.io
+    state: latest
+    update_cache: yes
+  when: ansible_distribution in ["Debian", "Ubuntu"]
+
+# install docker-compose
+- name: Install docker-compose software
+  apt:
+    name:
+    - docker-compose
+    state: present
+  notify:
+    - restart docker
+    
+# create docker directory structure
+# Create directory structure under the user
+- name: Create docker directory structure
+  become: yes
+  become_user: rick
+  file:
+    path: /home/rick/docker/share
+    state: directory
+  tags: docker
+
+- name: Add user to docker group
+  user:
+    name: rick
+    groups: docker
+    append: yes
+    state: present
+
+# copy docker compose file over
+
+# start container
