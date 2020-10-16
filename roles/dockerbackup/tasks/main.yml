@@ -19,7 +19,7 @@
     name: homeassistant/home-assistant
     tag: stable
     state: present
-    timeout: 120
+    timeout: 180
     archive_path: /home/rick/docker/homeassist/homeassist_image.tar
     source: local
 
