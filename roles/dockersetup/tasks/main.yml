@@ -21,14 +21,24 @@
     - restart docker
     
 # create docker directory structure
-# Create directory structure under the user
 - name: Create docker directory structure
   become: yes
-  become_user: rick
   file:
     path: /home/rick/docker/share
+    owner: rick
+    group: docker
+    mode: 0775
     state: directory
   tags: docker
+
+- name: Create homeassistant directory structure
+  become: yes
+  file:
+    path: /home/rick/docker/homeassist
+    owner: rick
+    group: docker
+    mode: 0775
+    state: directory
 
 - name: Add user to docker group
   user:
@@ -38,5 +48,52 @@
     state: present
 
 # copy docker compose file over
+- name: copy docker-compose.yml file
+  copy:
+    src: docker-compose.yml
+    dest: /home/rick/docker/docker-compose.yml
+    owner: rick
+    group: rick
+    mode: 0644
+
+# copy hsLogs.sh over
+- name: copy hsLogs.sh file
+  copy:
+    src: hsLogs.sh
+    dest: /home/rick/docker/hsLogs.sh
+    owner: rick
+    group: rick
+    mode: 0744
+
+# copy tar of homeassistant files over
+- name: copy home.tar.gz file
+  copy:
+    src: /home/rick/home.tar.gz
+    dest: /home/rick/docker/homeassist
+    owner: rick
+    group: rick
+    mode: 0644
+
+- name: check if config directory exits
+  stat:
+    path: /home/rick/docker/homeassist/config
+  register: file_details
+
+# untar files into homesassistant directory
+- name: Extract home.tar.gz into /home/rick/docker/homeassist
+  unarchive:
+    src: /home/rick/docker/homeassist/home.tar.gz
+    dest: /home/rick/docker/homeassist
+    remote_src: yes
+  when: file_details.stat.exists == False
 
 # start container
+- name: run the docker-compose to start containers
+  community.general.docker_compose:
+    project_src: /home/rick/docker/
+  register: output
+
+- ansible.builtin.debug:
+    var: output
+  
+...
